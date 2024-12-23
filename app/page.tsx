@@ -29,7 +29,7 @@ export default function Home() {
           </div>
 
           <h2 className="text-4xl md:text-6xl font-bold max-w-3xl leading-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
-            Send Crypto Payments Directly to Twitter Users
+            Send Crypto on Twitter
           </h2>
 
           <p className="text-xl text-muted-foreground max-w-2xl">
