@@ -41,13 +41,6 @@ export default function Home() {
             <Button size="lg" className="gap-2 text-lg px-8 py-6">
               Get Started <ArrowRight className="w-5 h-5" />
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="gap-2 text-lg px-8 py-6"
-            >
-              <Twitter className="w-5 h-5" /> Connect Twitter
-            </Button>
           </div>
         </div>
       </div>

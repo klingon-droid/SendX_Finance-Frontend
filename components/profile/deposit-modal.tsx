@@ -48,20 +48,30 @@ export function DepositModal({ open, onClose }: DepositModalProps) {
 
       // Fetch the current balance from the database
       const response = await axios.get(`/api/userBalance?username=${user?.twitter?.username}`);
-      const currentBalance = response.data.data.balance || 0;
 
-      console.log("current balance", currentBalance);
+      if (response) {
 
-      // Calculate the new balance
-      const newBalance = currentBalance + Number(amount);
+        const currentBalance = response.data.data.balance || 0;
 
-      console.log("new balance", newBalance);
+        console.log("current balance", currentBalance);
+
+        // Calculate the new balance
+        const newBalance = currentBalance + Number(amount);
+
+        console.log("new balance", newBalance);
+        await axios.post('/api/userBalance', {
+          username: user?.twitter?.username,
+          balance: newBalance,
+        });
+      } else {
+        await axios.post('/api/userBalance', {
+          username: user?.twitter?.username,
+          balance: Number(amount),
+        });
+      }
 
       // Update the balance in the database
-      await axios.post('/api/userBalance', {
-        username: user?.twitter?.username,
-        balance: newBalance,
-      });
+
 
       onClose();
     } catch (error) {
