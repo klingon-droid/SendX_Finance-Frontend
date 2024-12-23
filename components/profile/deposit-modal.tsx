@@ -9,11 +9,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import {
   WalletDisconnectButton,
   WalletMultiButton,
 } from "@solana/wallet-adapter-react-ui";
+import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 
 interface DepositModalProps {
   open: boolean;
@@ -22,11 +23,24 @@ interface DepositModalProps {
 
 export function DepositModal({ open, onClose }: DepositModalProps) {
   const [amount, setAmount] = useState("");
-  const { connected } = useWallet();
+  const { connected, publicKey } = useWallet();
+  const wallet = useWallet();
+  const { connection } = useConnection();
   console.log(connected);
 
-  const handleDeposit = () => {
-    // Handle deposit logic here
+  const handleDeposit = async () => {
+    const amountInLamports = Number(amount) * 10 ** 9;
+    if (!publicKey) return;
+
+    const transaction = new Transaction().add(
+      SystemProgram.transfer({
+        fromPubkey: publicKey,
+        toPubkey: new PublicKey(process.env.NEXT_PUBLIC_BOT_PUBLIC_KEY ?? ""),
+        lamports: amountInLamports,
+      })
+    );
+
+    await wallet.sendTransaction(transaction, connection);
     onClose();
   };
 

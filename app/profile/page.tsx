@@ -32,7 +32,7 @@ export default function ProfilePage() {
     </div>
   ) : (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Profile</h1>
+      <h1 className="text-3xl font-bold mb-8 mx-auto text-center">Profile</h1>
 
       <div className="max-w-2xl mx-auto space-y-6">
         <UserInfoCard
