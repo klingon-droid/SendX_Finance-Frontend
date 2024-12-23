@@ -49,7 +49,7 @@ export function DepositModal({ open, onClose }: DepositModalProps) {
       // Fetch the current balance from the database
       const response = await axios.get(`/api/userBalance?username=${user?.twitter?.username}`);
 
-      if (response.data) {
+      if (response.data.data.balance) {
 
         const currentBalance = response.data.data.balance || 0;
 
