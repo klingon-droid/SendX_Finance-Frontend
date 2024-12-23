@@ -49,9 +49,13 @@ export default function ProfilePage() {
     async function fetchBalance() {
       if (user?.twitter?.username) {
         try {
-          const response = await axios.get(`/api/userBalance?username=${user?.twitter?.username}`);
+          const response = await axios.get(
+            `/api/userBalance?username=${user?.twitter?.username}`
+          );
           console.log(response.data);
-          if (response) {
+          if (response.data.data == null) {
+            setBalance(0);
+          } else {
             setBalance(response.data.data.balance);
           }
         } catch (error) {
@@ -84,10 +88,7 @@ export default function ProfilePage() {
           balance={privyBalance}
         />
 
-        <BalanceCard
-          balance={balance}
-          deposits={mockUserData.deposits}
-        />
+        <BalanceCard balance={balance} deposits={mockUserData.deposits} />
       </div>
     </div>
   );
