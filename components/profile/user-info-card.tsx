@@ -3,6 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { Twitter, Wallet, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSolanaWallets } from "@privy-io/react-auth/solana";
 
 interface UserInfoCardProps {
   name: string;
@@ -19,10 +20,7 @@ export function UserInfoCard({
   chain,
   balance,
 }: UserInfoCardProps) {
-  const handleExportWallet = () => {
-    // Handle wallet export logic here
-    console.log("Exporting wallet...");
-  };
+  const { exportWallet } = useSolanaWallets();
 
   return (
     <Card className="p-6 space-y-6">
@@ -71,7 +69,7 @@ export function UserInfoCard({
           <Button
             variant="outline"
             className="w-full gap-2"
-            onClick={handleExportWallet}
+            onClick={() => exportWallet()}
           >
             <Download className="w-4 h-4" />
             Export Wallet
