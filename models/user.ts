@@ -4,10 +4,9 @@ import mongoose from "mongoose";
 const UserSchema = new mongoose.Schema({
   username: String,
   balance: Number,
-  twitterId: String,
 });
 
-const User = mongoose.model("User", UserSchema);
+const User = mongoose.models.User || mongoose.model("User", UserSchema);
 
 export default User;
 

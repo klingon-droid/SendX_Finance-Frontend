@@ -15,6 +15,8 @@ import {
   WalletMultiButton,
 } from "@solana/wallet-adapter-react-ui";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { usePrivy } from "@privy-io/react-auth";
+import axios from "axios";
 
 interface DepositModalProps {
   open: boolean;
@@ -22,6 +24,7 @@ interface DepositModalProps {
 }
 
 export function DepositModal({ open, onClose }: DepositModalProps) {
+  const { user } = usePrivy();
   const [amount, setAmount] = useState("");
   const { connected, publicKey } = useWallet();
   const wallet = useWallet();
@@ -40,8 +43,30 @@ export function DepositModal({ open, onClose }: DepositModalProps) {
       })
     );
 
-    await wallet.sendTransaction(transaction, connection);
-    onClose();
+    try {
+      await wallet.sendTransaction(transaction, connection);
+
+      // Fetch the current balance from the database
+      const response = await axios.get(`/api/userBalance?username=${user?.twitter?.username}`);
+      const currentBalance = response.data.data.balance || 0;
+
+      console.log("current balance", currentBalance);
+
+      // Calculate the new balance
+      const newBalance = currentBalance + Number(amount);
+
+      console.log("new balance", newBalance);
+
+      // Update the balance in the database
+      await axios.post('/api/userBalance', {
+        username: user?.twitter?.username,
+        balance: newBalance,
+      });
+
+      onClose();
+    } catch (error) {
+      console.error("Error during deposit:", error);
+    }
   };
 
   return (

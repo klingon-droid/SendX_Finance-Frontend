@@ -8,37 +8,47 @@ export async function POST(request: NextRequest) {
     await dbConnect();
 
     // Parse the request body
-    // example const { username , balance , twitterId } = await request.json();
+    const { username, balance } = await request.json();
+
+    // Update or create the user in the database
+    const user = await User.findOneAndUpdate(
+      { username },
+      { balance: balance ?? 0 }, // Set balance to 0 if not provided
+      { new: true, upsert: true }
+    );
 
     // Return success response
     return NextResponse.json(
       {
-        message: "Mint address added successfully",
-        data: "yourdata",
+        message: "User balance updated successfully",
+        data: user,
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error adding user data:", error);
+    console.error("Error updating user balance:", error);
     return NextResponse.json(
-      { error: "Failed to add user data" },
+      { error: "Failed to update user balance" },
       { status: 500 }
     );
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const username = searchParams.get('username');
   try {
     // Connect to the database
     await dbConnect();
 
-    // Retrieve all mint addresses
-    const response = await User.find();
-    // Return mint addresses
+    // Retrieve all users with their balances
+    const users = await User.findOne({ username: username });
+
+    // Return user data with balances
     return NextResponse.json(
       {
-        message: "Mint addresses retrieved successfully",
-        data: "your data",
+        message: "User balances retrieved successfully",
+        data: users,
       },
       { status: 200 }
     );

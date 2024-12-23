@@ -41,7 +41,7 @@ export function UserInfoCard({
             <div>
               <p className="font-medium">Your Balance</p>
               <p className="text-lg font-semibold text-primary">
-                {balance.toFixed(2)} SOL
+                {balance} SOL
               </p>
             </div>
           </div>
