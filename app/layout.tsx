@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme/theme-provider";
 import { Navbar } from "@/components/layout/navbar";
 import { Providers } from "./Providers";
 import { Send } from "lucide-react";
+import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -65,6 +66,7 @@ export default function RootLayout({
             </footer>
           </ThemeProvider>
         </Providers>
+        <Analytics />
       </body>
     </html>
   );
