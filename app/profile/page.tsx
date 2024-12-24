@@ -45,26 +45,30 @@ export default function ProfilePage() {
     }
   }, [user?.wallet?.address]);
 
-  useEffect(() => {
-    async function fetchBalance() {
-      if (user?.twitter?.username) {
-        try {
-          const response = await axios.get(
-            `/api/userBalance?username=${user?.twitter?.username}`
-          );
-          console.log(response.data);
-          if (response.data.data == null) {
-            setBalance(0);
-          } else {
-            setBalance(response.data.data.balance);
-          }
-        } catch (error) {
-          console.error("Error fetching balance:", error);
+  async function getDepositBalance() {
+    if (user?.twitter?.username) {
+      try {
+        const response = await axios.get(
+          `/api/userBalance?username=${user?.twitter?.username}`
+        );
+        console.log(response.data);
+        if (response.data.data == null) {
+          setBalance(0);
+          await axios.post("/api/userBalance", {
+            username: user?.twitter?.username,
+            balance: 0,
+          });
+        } else {
+          setBalance(response.data.data.balance);
         }
+      } catch (error) {
+        console.error("Error fetching balance:", error);
       }
     }
+  }
 
-    fetchBalance();
+  useEffect(() => {
+    getDepositBalance();
   }, [user?.twitter?.username]);
 
   return !user ? (
