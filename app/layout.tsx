@@ -32,13 +32,13 @@ export default function RootLayout({
             <Navbar />
             {children}
             <footer className="border-t">
-              <div className="container mx-auto px-4 py-8">
+              <div className="container mx-auto px-4 md:px-20 py-8">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                   <div className="flex items-center gap-2">
                     <Send className="w-6 h-6" />
                     <span className="font-semibold">SendX</span>
                   </div>
-                  <div className="flex items-center gap-6">
+                  <div className="flex flex-col md:flex-row items-center gap-6">
                     <a
                       href="#"
                       className="text-sm text-muted-foreground hover:text-primary"
@@ -58,7 +58,7 @@ export default function RootLayout({
                       Contact
                     </a>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground text-center md:text-left">
                     © 2024 SendX. All rights reserved.
                   </p>
                 </div>

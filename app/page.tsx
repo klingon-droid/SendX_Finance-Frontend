@@ -8,20 +8,21 @@ import {
   Wallet,
   Zap,
   ArrowRight,
-  CheckCircle2,
   Shield,
   Globe,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary">
       {/* Hero Section */}
       <div className="container mx-auto px-4 pt-24 pb-32">
         <div className="flex flex-col items-center text-center space-y-8 relative">
           {/* Decorative elements */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl -z-10" />
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-3xl -z-10" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[50vw] h-[50vw] max-w-[600px] bg-primary/5 rounded-full blur-3xl -z-10" />
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[33vw] h-[33vw] max-w-[400px] bg-blue-500/5 rounded-full blur-3xl -z-10" />
 
           <div className="flex items-center gap-3 text-primary animate-fade-in">
             <Send className="w-12 h-12" />
@@ -38,7 +39,11 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 pt-8">
-            <Button size="lg" className="gap-2 text-lg px-8 py-6">
+            <Button
+              size="lg"
+              className="gap-2 text-lg px-8 py-6"
+              onClick={() => router.push("/profile")}
+            >
               Get Started <ArrowRight className="w-5 h-5" />
             </Button>
           </div>
@@ -47,7 +52,7 @@ export default function Home() {
 
       {/* Features Section */}
       <div className="bg-secondary/50 py-32">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 md:px-20">
           <div className="text-center mb-20">
             <h3 className="text-3xl font-bold mb-4">Why Choose SendX?</h3>
             <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -131,7 +136,6 @@ export default function Home() {
       </div>
 
       {/* CTA Section */}
-      {/* //make bg of cta same as hero section */}
       <div className="bg-gradient-to-b from-background to-secondary py-32">
         <div className="container mx-auto px-4 text-center">
           <div className="relative">
@@ -144,6 +148,7 @@ export default function Home() {
               size="lg"
               variant="secondary"
               className="gap-2 text-lg px-8 py-6"
+              onClick={() => router.push("/profile")}
             >
               Launch App <ArrowRight className="w-5 h-5" />
             </Button>

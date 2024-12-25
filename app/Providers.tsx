@@ -18,7 +18,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <WalletProvider wallets={[]} autoConnect>
         <WalletModalProvider>
           <PrivyProvider
-            appId="cm50320pp03aj5mhzjd39agc3"
+            appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ""}
             config={{
               // Customize Privy's appearance in your app
               appearance: {

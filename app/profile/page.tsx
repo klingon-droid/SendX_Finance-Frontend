@@ -92,7 +92,11 @@ export default function ProfilePage() {
           balance={privyBalance}
         />
 
-        <BalanceCard balance={balance} deposits={mockUserData.deposits} />
+        <BalanceCard
+          balance={balance}
+          deposits={mockUserData.deposits}
+          getDepositBalance={getDepositBalance}
+        />
       </div>
     </div>
   );
