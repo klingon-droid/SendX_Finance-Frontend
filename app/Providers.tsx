@@ -14,7 +14,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ConnectionProvider endpoint={"https://api.devnet.solana.com"}>
+    <ConnectionProvider endpoint={"https://api.mainnet-beta.solana.com"}>
       <WalletProvider wallets={[]} autoConnect>
         <WalletModalProvider>
           <PrivyProvider
@@ -26,12 +26,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 theme: "light",
                 accentColor: "#676FFF",
               },
+              // Enable specific login methods including Twitter
+              loginMethods: ["email", "twitter"],
               // Create embedded wallets for users who don't have a wallet
               embeddedWallets: {
                 createOnLogin: "off",
               },
               solanaClusters: [
-                { name: "devnet", rpcUrl: "https://api.devnet.solana.com" },
+                { name: "mainnet-beta", rpcUrl: "https://api.mainnet-beta.solana.com" },
               ],
             }}
           >
