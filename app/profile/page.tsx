@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { Button } from "@/components/ui/button";
 
 // This would normally come from your auth/state management
 const mockUserData = {
@@ -31,44 +32,66 @@ export default function ProfilePage() {
 
   const getPrivyBalance = async () => {
     if (user?.wallet?.address) {
-      const publicKey = new PublicKey(user?.wallet?.address ?? "");
-      const balance = await connection.getBalance(publicKey);
-      const balanceInSol = balance / LAMPORTS_PER_SOL;
-      console.log("privy balance", balanceInSol);
-      setPrivyBalance(balanceInSol);
+      try {
+        const publicKey = new PublicKey(user?.wallet?.address ?? "");
+        const balance = await connection.getBalance(publicKey);
+        const balanceInSol = balance / LAMPORTS_PER_SOL;
+        setPrivyBalance(balanceInSol);
+      } catch (error) {
+        console.error("Error fetching wallet balance:", error);
+      }
     }
   };
-
-  useEffect(() => {
-    if (user?.wallet?.address) {
-      getPrivyBalance();
-    }
-  }, [user?.wallet?.address]);
 
   async function getDepositBalance() {
     if (user?.twitter?.username) {
       try {
+        console.log('Fetching deposit balance for username:', user.twitter.username);
         const response = await axios.get(
           `/api/userBalance?username=${user?.twitter?.username}`
         );
-        console.log(response.data);
+        console.log('Deposit balance API response:', response.data);
+        
         if (response.data.data == null) {
+          console.log('No balance found, initializing to 0');
           setBalance(0);
           await axios.post("/api/userBalance", {
             username: user?.twitter?.username,
             balance: 0,
           });
         } else {
+          console.log('Setting balance to:', response.data.data.balance);
           setBalance(response.data.data.balance);
         }
       } catch (error) {
-        console.error("Error fetching balance:", error);
+        console.error("Error fetching deposit balance:", error);
       }
     }
   }
 
+  // Refresh balances periodically
   useEffect(() => {
-    getDepositBalance();
+    if (user?.wallet?.address || user?.twitter?.username) {
+      const refreshInterval = setInterval(() => {
+        getPrivyBalance();
+        getDepositBalance();
+      }, 10000); // Refresh every 10 seconds
+
+      return () => clearInterval(refreshInterval);
+    }
+  }, [user?.wallet?.address, user?.twitter?.username]);
+
+  // Initial balance fetch
+  useEffect(() => {
+    if (user?.wallet?.address) {
+      getPrivyBalance();
+    }
+  }, [user?.wallet?.address]);
+
+  useEffect(() => {
+    if (user?.twitter?.username) {
+      getDepositBalance();
+    }
   }, [user?.twitter?.username]);
 
   return !user ? (

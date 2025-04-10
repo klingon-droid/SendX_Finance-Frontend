@@ -10,8 +10,8 @@ import { Analytics } from "@vercel/analytics/react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "SendX - Crypto Payments via Twitter",
-  description: "Send Solana payments using Twitter handles",
+  title: "AeroSol - Crypto Payments via X",
+  description: "Send Solana payments using X handles",
 };
 
 export default function RootLayout({
@@ -36,7 +36,7 @@ export default function RootLayout({
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                   <div className="flex items-center gap-2">
                     <Send className="w-6 h-6" />
-                    <span className="font-semibold">SendX</span>
+                    <span className="font-semibold">AeroSol</span>
                   </div>
                   <div className="flex flex-col md:flex-row items-center gap-6">
                     <a
@@ -59,7 +59,7 @@ export default function RootLayout({
                     </a>
                   </div>
                   <p className="text-sm text-muted-foreground text-center md:text-left">
-                    © 2024 SendX. All rights reserved.
+                    © 2025 AeroSol. All rights reserved.
                   </p>
                 </div>
               </div>

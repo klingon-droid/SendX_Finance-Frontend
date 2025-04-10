@@ -12,10 +12,8 @@ export function Navbar() {
   const { ready, authenticated, login, user } = usePrivy();
   const { createWallet } = useSolanaWallets();
   const { logout } = useLogout();
-  console.log(user);
   async function createSOLWallet() {
     const wallet = await createWallet();
-    console.log("wallet", wallet);
   }
   // Disable login when Privy is not ready or the user is already authenticated
   const disableLogin = !ready || (ready && authenticated);
@@ -29,7 +27,7 @@ export function Navbar() {
       <div className="container mx-auto px-4 lg:px-20 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <Send className="w-6 h-6" />
-          <span className="font-semibold">SendX</span>
+          <span className="font-semibold">AeroSol</span>
         </Link>
         <div className="flex items-center gap-4">
           <Link href="/" className="hidden sm:flex">
@@ -45,7 +43,6 @@ export function Navbar() {
               <Button
                 disabled={disableLogin}
                 onClick={async () => {
-                  console.log("login");
                   login();
                 }}
               >

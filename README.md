@@ -1,10 +1,10 @@
-# SendX
+# AeroSol
 
-SendX is a web3 application that allows users to connect their wallets, manage deposits, and track their Solana balances. The platform integrates with Twitter authentication and provides a seamless interface for users to manage their crypto assets.
+AeroSol is a web3 application that allows users to connect their wallets, manage deposits, and track their Solana balances. The platform integrates with Twitter authentication and provides a seamless interface for users to manage their crypto assets.
 
 ## Website Preview
 
-![SendX Dashboard](./public/images/dashboard.png)
+![AeroSol Dashboard](./public/images/dashboard.png)
 
 <!-- Add your website screenshot in public/images/dashboard.png -->
 
@@ -29,7 +29,7 @@ SendX is a web3 application that allows users to connect their wallets, manage d
 ## Project Structure
 
 ```
-sendx/
+AeroSol/
 ├── app/
 │   ├── api/
 │   │   └── userBalance/ # API endpoints for balance management

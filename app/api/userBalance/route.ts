@@ -4,20 +4,23 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    // Connect to the database
     await dbConnect();
 
-    // Parse the request body
     const { username, balance } = await request.json();
 
-    // Update or create the user in the database
+    if (!username) {
+      return NextResponse.json(
+        { error: "Username is required" },
+        { status: 400 }
+      );
+    }
+
     const user = await User.findOneAndUpdate(
       { username },
-      { balance: balance ?? 0 }, // Set balance to 0 if not provided
+      { balance: balance ?? 0 },
       { new: true, upsert: true }
     );
 
-    // Return success response
     return NextResponse.json(
       {
         message: "User balance updated successfully",
@@ -26,7 +29,6 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error updating user balance:", error);
     return NextResponse.json(
       { error: "Failed to update user balance" },
       { status: 500 }
@@ -35,25 +37,29 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const username = searchParams.get('username');
   try {
-    // Connect to the database
+    const { searchParams } = new URL(request.url);
+    const username = searchParams.get('username');
+
+    if (!username) {
+      return NextResponse.json(
+        { error: "Username parameter is required" },
+        { status: 400 }
+      );
+    }
+
     await dbConnect();
 
-    // Retrieve all users with their balances
-    const users = await User.findOne({ username: username });
+    const user = await User.findOne({ username });
 
-    // Return user data with balances
     return NextResponse.json(
       {
-        message: "User balances retrieved successfully",
-        data: users,
+        message: "User balance retrieved successfully",
+        data: user,
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error retrieving user data:", error);
     return NextResponse.json(
       { error: "Failed to retrieve user data" },
       { status: 500 }
