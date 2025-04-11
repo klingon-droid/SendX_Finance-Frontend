@@ -6,6 +6,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Providers } from "./Providers";
 import { Send } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -64,6 +65,7 @@ export default function RootLayout({
                 </div>
               </div>
             </footer>
+            <Toaster position="top-right" />
           </ThemeProvider>
         </Providers>
         <Analytics />

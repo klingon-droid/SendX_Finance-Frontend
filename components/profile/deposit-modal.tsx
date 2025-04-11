@@ -58,6 +58,8 @@ export function DepositModal({ open, onClose, walletAddress }: DepositModalProps
 
     setIsLoading(true);
     let confirmationStrategy: any;
+    let signature: string = '';
+    
     try {
       const amountInLamports = Number(amount) * 10 ** 9;
       console.log('Amount in lamports:', amountInLamports);
@@ -99,7 +101,7 @@ export function DepositModal({ open, onClose, walletAddress }: DepositModalProps
       );
 
       console.log('Sending transaction...');
-      const signature = await wallet.sendTransaction(transaction, connection);
+      signature = await wallet.sendTransaction(transaction, connection);
       console.log('Transaction sent, signature:', signature);
       
       confirmationStrategy = {
@@ -135,9 +137,11 @@ export function DepositModal({ open, onClose, walletAddress }: DepositModalProps
           "value" in res &&
           typeof res.value === "object" &&
           res.value !== null &&
-          !("err" in res.value)
+          ("err" in res.value && res.value.err === null)
         );
       };
+
+
 
       if (!isSuccessfulConfirmation(status)) {
         if (status && typeof status === 'object' && 'value' in status && status.value && typeof status.value === 'object' && 'err' in status.value) {
@@ -169,15 +173,58 @@ export function DepositModal({ open, onClose, walletAddress }: DepositModalProps
       });
       console.log('Balance update API response:', updateResponse.data);
 
-      toast.success("Deposit successful!");
+      // Create Solana Explorer link
+      const explorerUrl = `https://solscan.io/tx/${signature}`;
+ 
+      toast.success(
+        <div className="flex flex-col gap-2">
+          <div>Deposit successful!</div>
+          <a 
+            href={explorerUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blue-500 underline hover:text-blue-700"
+          >
+            View transaction on Solscan
+          </a>
+        </div>,
+        {
+          duration: 6000, 
+        }
+      );
+
       onClose();
     } catch (error) {
       console.error("Error during deposit:", error);
       if (error instanceof Error && error.message.includes('timeout')) {
         console.error("Confirmation timed out. Strategy used:", confirmationStrategy);
       }
-      const errorMessage = error instanceof Error ? error.message : "Failed to process deposit";
-      toast.error(errorMessage);
+      
+      // Even if there was an error in our confirmation process,
+      // check if we have a signature and the transaction might have gone through
+      if (signature) {
+        const explorerUrl = `https://solscan.io/tx/${signature}`;
+        toast.error(
+          <div className="flex flex-col gap-2">
+            <div>{error instanceof Error ? error.message : "Failed to process deposit"}</div>
+            <div className="text-sm">Your transaction might still have gone through.</div>
+            <a 
+              href={explorerUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-500 underline hover:text-blue-700"
+            >
+              Check status on Solscan
+            </a>
+          </div>,
+          {
+            duration: 8000, // Show error toast longer
+          }
+        );
+      } else {
+        const errorMessage = error instanceof Error ? error.message : "Failed to process deposit";
+        toast.error(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
