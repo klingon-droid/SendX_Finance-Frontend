@@ -116,9 +116,10 @@ export default function ProfilePage() {
         />
 
         <BalanceCard
-          balance={balance}
+          balance={privyBalance}
           deposits={mockUserData.deposits}
           getDepositBalance={getDepositBalance}
+          walletAddress={user?.wallet?.address ?? "Not Connected"}
         />
       </div>
     </div>

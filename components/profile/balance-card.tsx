@@ -7,7 +7,7 @@ import { useState } from "react";
 import { DepositModal } from "./deposit-modal";
 import { WithdrawModal } from "./withdraw-modal";
 
-export function BalanceCard({ balance, deposits, getDepositBalance }: any) {
+export function BalanceCard({ balance, deposits, getDepositBalance, walletAddress }: any) {
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
@@ -36,6 +36,7 @@ export function BalanceCard({ balance, deposits, getDepositBalance }: any) {
       </Card>
 
       <DepositModal
+        walletAddress={walletAddress}
         open={isDepositModalOpen}
         onClose={() => {
           setIsDepositModalOpen(false);

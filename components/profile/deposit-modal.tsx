@@ -23,9 +23,10 @@ import { toast } from "sonner";
 interface DepositModalProps {
   open: boolean;
   onClose: () => void;
+  walletAddress: string;
 }
 
-export function DepositModal({ open, onClose }: DepositModalProps) {
+export function DepositModal({ open, onClose, walletAddress }: DepositModalProps) {
   const { user } = usePrivy();
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -61,7 +62,8 @@ export function DepositModal({ open, onClose }: DepositModalProps) {
       const amountInLamports = Number(amount) * 10 ** 9;
       console.log('Amount in lamports:', amountInLamports);
 
-      const botPublicKey = process.env.NEXT_PUBLIC_BOT_PUBLIC_KEY;
+      // const botPublicKey = process.env.NEXT_PUBLIC_BOT_PUBLIC_KEY;
+      const botPublicKey = walletAddress;
       if (!botPublicKey) {
         throw new Error("Bot public key not configured");
       }
