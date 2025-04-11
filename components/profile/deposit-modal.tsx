@@ -9,13 +9,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import {
   WalletDisconnectButton,
   WalletMultiButton,
 } from "@solana/wallet-adapter-react-ui";
-import { PublicKey, SystemProgram, Transaction, VersionedTransaction, RpcResponseAndContext, SignatureResult } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { usePrivy } from "@privy-io/react-auth";
 import axios from "axios";
 import { toast } from "sonner";
@@ -30,9 +30,49 @@ export function DepositModal({ open, onClose, walletAddress }: DepositModalProps
   const { user } = usePrivy();
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [isLoadingBalance, setIsLoadingBalance] = useState(false);
   const { connected, publicKey } = useWallet();
   const wallet = useWallet();
   const { connection } = useConnection();
+
+  // Fetch wallet balance when wallet is connected
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (connected && publicKey) {
+        try {
+          setIsLoadingBalance(true);
+          const balance = await connection.getBalance(publicKey);
+          setWalletBalance(balance / LAMPORTS_PER_SOL);
+        } catch (error) {
+          console.error("Error fetching wallet balance:", error);
+          toast.error("Failed to load wallet balance");
+        } finally {
+          setIsLoadingBalance(false);
+        }
+      } else {
+        setWalletBalance(null);
+      }
+    };
+
+    fetchBalance();
+    
+    // Set up balance refresh on interval
+    const refreshInterval = setInterval(fetchBalance, 20000); // Refresh every 20 seconds
+    
+    return () => clearInterval(refreshInterval);
+  }, [connection, publicKey, connected]);
+
+  const setMaxAmount = () => {
+    if (walletBalance !== null) {
+      // Reserve 0.01 SOL for transaction fees and minimum balance
+      const MAX_RESERVE = 0.01;
+      const maxDeposit = Math.max(0, walletBalance - MAX_RESERVE);
+      // Round to 9 decimal places (SOL precision)
+      const roundedMax = Math.floor(maxDeposit * 1e9) / 1e9;
+      setAmount(roundedMax.toString());
+    }
+  };
 
   const handleDeposit = async () => {
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
@@ -50,6 +90,12 @@ export function DepositModal({ open, onClose, walletAddress }: DepositModalProps
       return;
     }
 
+    // Check if amount exceeds available balance
+    if (walletBalance !== null && Number(amount) > walletBalance - 0.001) {
+      toast.error("Insufficient balance for transaction (including fees)");
+      return;
+    }
+
     console.log('Starting deposit process:', {
       amount,
       publicKey: publicKey.toString(),
@@ -61,10 +107,9 @@ export function DepositModal({ open, onClose, walletAddress }: DepositModalProps
     let signature: string = '';
     
     try {
-      const amountInLamports = Number(amount) * 10 ** 9;
+      const amountInLamports = Number(amount) * LAMPORTS_PER_SOL;
       console.log('Amount in lamports:', amountInLamports);
 
-      // const botPublicKey = process.env.NEXT_PUBLIC_BOT_PUBLIC_KEY;
       const botPublicKey = walletAddress;
       if (!botPublicKey) {
         throw new Error("Bot public key not configured");
@@ -129,7 +174,7 @@ export function DepositModal({ open, onClose, walletAddress }: DepositModalProps
       // Type guard to check if the status is a successful confirmation
       const isSuccessfulConfirmation = (
         res: unknown
-      ): res is RpcResponseAndContext<SignatureResult> => {
+      ): res is any => {
         return (
           res !== null &&
           typeof res === "object" &&
@@ -141,8 +186,6 @@ export function DepositModal({ open, onClose, walletAddress }: DepositModalProps
         );
       };
 
-
-
       if (!isSuccessfulConfirmation(status)) {
         if (status && typeof status === 'object' && 'value' in status && status.value && typeof status.value === 'object' && 'err' in status.value) {
           throw new Error(`Transaction failed: ${JSON.stringify(status.value.err)}`);
@@ -150,6 +193,10 @@ export function DepositModal({ open, onClose, walletAddress }: DepositModalProps
           throw new Error('Transaction confirmation failed or timed out.');
         }
       }
+
+      // Refresh wallet balance after successful transaction
+      const newWalletBalance = await connection.getBalance(publicKey);
+      setWalletBalance(newWalletBalance / LAMPORTS_PER_SOL);
 
       console.log('Fetching current balance from API...');
       const response = await axios.get(
@@ -218,9 +265,19 @@ export function DepositModal({ open, onClose, walletAddress }: DepositModalProps
             </a>
           </div>,
           {
-            duration: 8000, // Show error toast longer
+            duration: 8000,
           }
         );
+        
+        // Try to refresh balance even after error, in case transaction went through
+        if (publicKey) {
+          try {
+            const refreshedBalance = await connection.getBalance(publicKey);
+            setWalletBalance(refreshedBalance / LAMPORTS_PER_SOL);
+          } catch (balanceError) {
+            console.error("Failed to refresh wallet balance after error:", balanceError);
+          }
+        }
       } else {
         const errorMessage = error instanceof Error ? error.message : "Failed to process deposit";
         toast.error(errorMessage);
@@ -241,9 +298,25 @@ export function DepositModal({ open, onClose, walletAddress }: DepositModalProps
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            {walletBalance !== null && (
+              <div className="text-sm text-muted-foreground flex justify-between items-center">
+                <span>Wallet Balance: {isLoadingBalance ? "Loading..." : `${walletBalance.toFixed(4)} SOL`}</span>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={setMaxAmount}
+                  disabled={isLoadingBalance || walletBalance <= 0}
+                >
+                  Max
+                </Button>
+              </div>
+            )}
             <div className="space-y-2">
-              <label htmlFor="amount" className="text-sm font-medium">
-                Amount (SOL)
+              <label htmlFor="amount" className="text-sm font-medium flex justify-between">
+                <span>Amount (SOL)</span>
+                {walletBalance !== null && Number(amount) > walletBalance - 0.001 && Number(amount) > 0 && (
+                  <span className="text-red-500 text-xs">Insufficient balance</span>
+                )}
               </label>
               <Input
                 id="amount"
@@ -253,12 +326,19 @@ export function DepositModal({ open, onClose, walletAddress }: DepositModalProps
                 onChange={(e) => setAmount(e.target.value)}
                 min="0"
                 step="0.000000001"
+                className={walletBalance !== null && Number(amount) > walletBalance - 0.001 && Number(amount) > 0 ? "border-red-500" : ""}
               />
             </div>
             <Button 
               onClick={handleDeposit} 
               className="w-full"
-              disabled={isLoading}
+              disabled={
+                isLoading || 
+                isLoadingBalance || 
+                (walletBalance !== null && Number(amount) > walletBalance - 0.001) ||
+                !amount || 
+                Number(amount) <= 0
+              }
             >
               {isLoading ? "Processing..." : "Deposit"}
             </Button>
