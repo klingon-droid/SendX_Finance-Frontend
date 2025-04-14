@@ -16,7 +16,8 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useSolanaWallets } from "@privy-io/react-auth/solana";
 import axios from "axios";
 import { toast } from "sonner";
-import { ExternalLink, Link } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import Link from "next/link";
 import { Transaction } from "@solana/web3.js";
 
 interface WithdrawModalProps {
