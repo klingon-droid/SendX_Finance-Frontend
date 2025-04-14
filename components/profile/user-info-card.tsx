@@ -5,6 +5,7 @@ import { Twitter, Wallet, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSolanaWallets } from "@privy-io/react-auth/solana";
 
+
 interface UserInfoCardProps {
   name: string;
   twitterHandle: string;

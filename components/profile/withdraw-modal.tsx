@@ -9,15 +9,15 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { usePrivy } from "@privy-io/react-auth";
+import { useSolanaWallets } from "@privy-io/react-auth/solana";
 import axios from "axios";
 import { toast } from "sonner";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Link } from "lucide-react";
 import { Transaction } from "@solana/web3.js";
-import { useWallet } from "@solana/wallet-adapter-react";
 
 interface WithdrawModalProps {
   open: boolean;
@@ -28,6 +28,10 @@ interface WithdrawModalProps {
 
 export function WithdrawModal({ open, onClose, balance, getDepositBalance }: WithdrawModalProps) {
   const { user } = usePrivy();
+  const { connection } = useConnection();
+  const { wallets } = useSolanaWallets();
+  const [embeddedWallet, setEmbeddedWallet] = useState<any>(null);
+  
   const [amount, setAmount] = useState("");
   const [recipientAddress, setRecipientAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -35,15 +39,19 @@ export function WithdrawModal({ open, onClose, balance, getDepositBalance }: Wit
     signature: string;
     solscanUrl: string;
   } | null>(null);
-  const { connection } = useConnection();
-  const wallet = useWallet();
+
+  // Find the Privy embedded wallet when wallets are loaded
+  useEffect(() => {
+    const privyWallet = wallets.find(wallet => wallet.walletClientType === 'privy');
+    setEmbeddedWallet(privyWallet);
+  }, [wallets]);
 
   const handleWithdraw = async () => {
-    if (!wallet.publicKey || !wallet.signTransaction) {
-      toast.error("Please connect your wallet first");
+    if (!embeddedWallet) {
+      toast.error("No Privy embedded wallet found");
       return;
     }
-
+    
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       toast.error("Please enter a valid amount");
       return;
@@ -73,7 +81,7 @@ export function WithdrawModal({ open, onClose, balance, getDepositBalance }: Wit
     }
 
     if (!user?.wallet?.address) {
-      toast.error("Please connect your wallet first");
+      toast.error("No wallet found for your account");
       return;
     }
 
@@ -102,8 +110,10 @@ export function WithdrawModal({ open, onClose, balance, getDepositBalance }: Wit
           Buffer.from(response.data.data.transaction, 'base64')
         );
 
-        // Sign and send the transaction
-        const signedTx = await wallet.signTransaction(transaction);
+        // Sign the transaction using Privy's embedded wallet
+        const signedTx = await embeddedWallet.signTransaction(transaction);
+        
+        // Send the signed transaction
         const signature = await connection.sendRawTransaction(signedTx.serialize());
         console.log('Transaction sent, signature:', signature);
 
@@ -111,6 +121,18 @@ export function WithdrawModal({ open, onClose, balance, getDepositBalance }: Wit
         const confirmation = await connection.confirmTransaction(signature);
         if (confirmation.value.err) {
           throw new Error('Transaction failed');
+        }
+
+        // Call the backend to update the user's balance in the database
+        try {
+          await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/confirm-withdraw`, {
+            username: user.twitter.username,
+            amount: Number(amount),
+            signature
+          });
+        } catch (confirmError) {
+          console.error("Error confirming withdrawal with backend:", confirmError);
+          // Continue anyway since the transaction succeeded on-chain
         }
 
         // Update the UI
@@ -156,15 +178,15 @@ export function WithdrawModal({ open, onClose, balance, getDepositBalance }: Wit
               <div className="space-y-4">
                 <p>Your withdrawal was successful!</p>
                 <div className="flex items-center gap-2">
-                  <a
+                  <Link
                     href={transactionDetails.solscanUrl}
                     target="_blank"
-                    rel="noopener noreferrer"
+                    
                     className="text-primary hover:underline flex items-center gap-1"
                   >
                     View transaction on Solscan
                     <ExternalLink className="w-4 h-4" />
-                  </a>
+                  </Link>
                 </div>
               </div>
             ) : (
@@ -206,10 +228,15 @@ export function WithdrawModal({ open, onClose, balance, getDepositBalance }: Wit
             <Button 
               onClick={handleWithdraw} 
               className="w-full"
-              disabled={isLoading}
+              disabled={isLoading || !embeddedWallet}
             >
               {isLoading ? "Processing..." : "Withdraw"}
             </Button>
+            {!embeddedWallet && (
+              <p className="text-sm text-red-500">
+                No Privy embedded wallet found. Please refresh or contact support.
+              </p>
+            )}
           </div>
         )}
         {transactionDetails && (
@@ -222,4 +249,4 @@ export function WithdrawModal({ open, onClose, balance, getDepositBalance }: Wit
       </DialogContent>
     </Dialog>
   );
-} 
+}
