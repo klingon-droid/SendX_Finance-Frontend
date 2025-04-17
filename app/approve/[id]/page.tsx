@@ -50,14 +50,16 @@ export default function TransactionApprovalPage() {
 
   // Fetch transaction details
   useEffect(() => {
+
+    
     async function fetchTransactionDetails() {
       if (!transactionId) return;
-      
       try {
         setIsLoadingTransaction(true);
         const response = await axios.get(`http://localhost:3001/api/transactions/${transactionId}`);
         
         if (response.data.success) {
+          console.log(response.data.transaction, 'babe')
           setTransaction(response.data.transaction);
         } else {
           setError("Failed to load transaction details");
@@ -107,10 +109,13 @@ export default function TransactionApprovalPage() {
       return;
     }
 
-    // Check if Twitter username matches transaction sender
+    console.log(user, transaction, 'who are they')
+
+
     if (user?.twitter?.username && user.twitter.username.toLowerCase() !== transaction.sender.toLowerCase()) {
-      toast.warning("This transaction was requested by a different Twitter account");
-      // Allow to continue anyway - user might have multiple Twitter accounts
+      toast.error("This transaction was requested by a different Twitter account");
+      return;
+     
     }
 
     // Check if amount exceeds available balance
@@ -221,7 +226,7 @@ export default function TransactionApprovalPage() {
 
       // Update transaction status on backend
       console.log('Updating transaction status on backend...');
-      await axios.post("/api/transactions/complete", {
+      await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions/complete`, {
         id: transaction.id,
         signature,
         senderAddress: publicKey.toBase58()
@@ -253,7 +258,7 @@ export default function TransactionApprovalPage() {
 
       // Redirect to success page
       setTimeout(() => {
-        router.push(`/transaction/success?tx=${signature}`);
+        router.push(`/profile`);
       }, 2000);
       
     } catch (error) {
@@ -352,10 +357,10 @@ export default function TransactionApprovalPage() {
           <h2 className="text-xl font-bold text-white">Approve Transaction</h2>
         </div>
         
-        <div className="p-6">
+        <div className="p-6 text-gray-700">
           <div className="mb-6">
             <p className="text-sm text-gray-500 mb-1">From</p>
-            <p className="font-medium">@{transaction.sender}</p>
+            <p className="font-medium ">@{transaction.sender}</p>
           </div>
           
           <div className="mb-4">
