@@ -58,10 +58,10 @@ export function WithdrawModal({ open, onClose, balance, getDepositBalance }: Wit
       return;
     }
 
-    if (Number(amount) > balance) {
-      toast.error("Insufficient balance");
-      return;
-    }
+    // if (Number(amount) > balance) {
+    //   toast.error("Insufficient balance");
+    //   return;
+    // }
 
     if (!recipientAddress) {
       toast.error("Please enter a recipient address");
