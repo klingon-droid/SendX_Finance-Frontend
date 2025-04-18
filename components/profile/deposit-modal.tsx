@@ -202,7 +202,7 @@ export function DepositModal({ open, onClose, walletAddress }: DepositModalProps
       const response = await axios.get(
         `/api/userBalance?username=${user.twitter.username}`
       );
-      console.log('Current balance API response:', response.data);
+
       
       let currentBalance = 0;
       if (response.data.data) {

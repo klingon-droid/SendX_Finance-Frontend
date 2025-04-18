@@ -9,7 +9,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <PrivyProvider
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
       config={{
-        loginMethods: ['twitter', 'email', 'wallet'],
+        loginMethods: ['twitter', 'wallet'],
         appearance: {
           theme: 'light',
           accentColor: '#9CA3AF', // Medium Gray
